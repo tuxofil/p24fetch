@@ -3,7 +3,9 @@ package config
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
+	"strings"
 
 	"github.com/kelseyhightower/envconfig"
 
@@ -14,6 +16,7 @@ type Config struct {
 	// Descriptive name of the merchant.
 	// Used for logging/messaging.
 	MerchantName string `split_words:"true" required:"true"`
+
 	// Privat24 Merchant ID
 	MerchantID int `split_words:"true" required:"true"`
 	// Privat34 Merchant Password
@@ -22,10 +25,12 @@ type Config struct {
 	CardNumber string `split_words:"true" required:"true"`
 	// Fetch transaction history for this number of days
 	Days int `split_words:"true" required:"true"`
+
 	// Deduplicator state directory
 	DedupDir string `split_words:"true" required:"true"`
 	// Path to a JSON file with sorting rules.
 	RulesPath string `split_words:"true" required:"true"`
+
 	// Export format
 	ExportFormat schema.Format `split_words:"true" required:"true"`
 	// Mandatory for QIF export format.
@@ -34,11 +39,19 @@ type Config struct {
 	// Mandatory for QIF export format.
 	// Account name for comissions.
 	ComissionAccountName string `split_words:"true"`
+
+	// Token used to authenticate to Slack API
+	SlackToken string `split_words:"true"`
+	// Slack channel ID to write messages to.
+	SlackChannel string `split_words:"true"`
+
+	// Logging interface. Optional.
+	Logger *log.Logger
 }
 
 // Read and parse configurations.
 func New() (*Config, error) {
-	cfg := &Config{}
+	cfg := &Config{Logger: log.New(os.Stderr, "", 0)}
 	if err := envconfig.Process("", cfg); err != nil {
 		return nil, fmt.Errorf("parse env vars: %w", err)
 	}
@@ -85,5 +98,15 @@ func (c *Config) Validate() error {
 	default:
 		return fmt.Errorf("invalid export format: %s", c.ExportFormat)
 	}
+
+	if s := c.SlackToken; s != "" && !strings.HasPrefix(s, "xoxp-") {
+		return errors.New("invalid Slack token")
+	}
 	return nil
+}
+
+func (c *Config) Logf(format string, v ...interface{}) {
+	if c.Logger != nil {
+		c.Logger.Printf(format, v...)
+	}
 }

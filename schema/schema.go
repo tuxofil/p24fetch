@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"html"
 	"strconv"
@@ -141,4 +143,20 @@ func (t *Transaction) Comission() float32 {
 		return 0
 	}
 	return -(t.SrcVal + t.DstVal)
+}
+
+func (t *Transaction) String() string {
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetIndent("", "  ")
+	var err error
+	if t.Raw != nil {
+		err = encoder.Encode(t.Raw)
+	} else {
+		err = encoder.Encode(t)
+	}
+	if err != nil {
+		panic(err)
+	}
+	return buf.String()
 }

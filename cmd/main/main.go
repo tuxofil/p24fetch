@@ -11,6 +11,7 @@ import (
 	"github.com/tuxofil/p24fetch/exporter"
 	"github.com/tuxofil/p24fetch/merchant"
 	"github.com/tuxofil/p24fetch/schema"
+	"github.com/tuxofil/p24fetch/slack"
 	"github.com/tuxofil/p24fetch/sorter"
 )
 
@@ -39,6 +40,10 @@ func Main() error {
 	sorter, err := sorter.New(cfg)
 	if err != nil {
 		return fmt.Errorf("create sorter: %w", err)
+	}
+	slack, err := slack.New(cfg)
+	if err != nil {
+		return fmt.Errorf("create Slack interface: %w", err)
 	}
 	exporter, err := exporter.New(cfg)
 	if err != nil {
@@ -69,7 +74,10 @@ func Main() error {
 	}
 
 	// Sort transactions
-	sortedTrans, _ := sorter.Sort(trans)
+	sortedTrans, unsortedTrans := sorter.Sort(trans)
+
+	// Send Slack notifications for unsorted transactions
+	slack.ReportUnsorted(unsortedTrans)
 
 	// Export transactions
 	if err := exporter.Export(sortedTrans, os.Stdout); err != nil {

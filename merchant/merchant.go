@@ -47,8 +47,9 @@ func (m *Merchant) FetchLog(ctx context.Context) ([]schema.XMLTransaction, error
 		wait      = 10 // in seconds
 		test      = 0
 		paymentID = fmt.Sprintf("%x", rand.Uint64())
-		fromDate  = time.Now().UTC().Add(-time.Hour * 24 * 7)
-		toDate    = time.Now().UTC()
+		fromDate  = time.Now().UTC().Add(-time.Hour * 24 *
+			time.Duration(m.config.Days))
+		toDate = time.Now().UTC()
 	)
 
 	// Generate request body

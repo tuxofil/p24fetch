@@ -1,0 +1,6 @@
+*~
+*.sw[op]
+.cover.out
+p24fetch
+*.env
+run

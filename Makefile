@@ -4,7 +4,7 @@ NAME = p24fetch
 COVER = .cover.out
 
 all:
-	go build -o $(NAME) ./cmd/$(NAME)
+	go build -o $(NAME) ./cmd/main
 
 run: all
 	./$(NAME)
@@ -20,4 +20,4 @@ cover: test
 	go tool cover -html=$(COVER)
 
 clean:
-	rm -rf -- $(NAME) $(COVER) run
+	rm -rf -- $(NAME) $(COVER) run dedup/testdata

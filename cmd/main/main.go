@@ -69,13 +69,10 @@ func Main() error {
 	}
 
 	// Sort transactions
-	sortedLog, err := sorter.Sort(trans)
-	if err != nil {
-		return fmt.Errorf("sort log: %w", err)
-	}
+	sortedTrans, _ := sorter.Sort(trans)
 
 	// Export transactions
-	if err := exporter.Export(sortedLog, os.Stdout); err != nil {
+	if err := exporter.Export(sortedTrans, os.Stdout); err != nil {
 		return fmt.Errorf("export: %w", err)
 	}
 

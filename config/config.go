@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/kelseyhightower/envconfig"
 
@@ -23,6 +24,8 @@ type Config struct {
 	Days int `split_words:"true" required:"true"`
 	// Deduplicator state directory
 	DedupDir string `split_words:"true" required:"true"`
+	// Path to a JSON file with sorting rules.
+	RulesPath string `split_words:"true" required:"true"`
 	// Export format
 	ExportFormat schema.Format `split_words:"true" required:"true"`
 	// Mandatory for QIF export format.
@@ -61,6 +64,11 @@ func (c *Config) Validate() error {
 	}
 	if c.DedupDir == "" {
 		return fmt.Errorf("invalid deduplicator dir: %#v", c.DedupDir)
+	}
+	if fd, err := os.Open(c.RulesPath); err != nil {
+		return fmt.Errorf("invalid path to rules file: %w", err)
+	} else {
+		_ = fd.Close()
 	}
 	if c.Days < 1 {
 		return fmt.Errorf("invalid days number: %d", c.Days)

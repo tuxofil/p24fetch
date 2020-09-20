@@ -44,38 +44,45 @@ func New(cfg *config.Config) (*Merchant, error) {
 // Fetch transaction log for the configured account.
 func (m *Merchant) FetchLog(ctx context.Context) ([]schema.XMLTransaction, error) {
 	var (
-		wait      = 10 // in seconds
-		test      = 0
-		paymentID = fmt.Sprintf("%x", rand.Uint64())
-		fromDate  = time.Now().UTC().Add(-time.Hour * 24 *
+		fromDate = time.Now().UTC().Add(-time.Hour * 24 *
 			time.Duration(m.config.Days))
 		toDate = time.Now().UTC()
 	)
 
 	// Generate request body
-	data := fmt.Sprintf("<oper>cmt</oper>"+
-		"<wait>%d</wait>"+
-		"<test>%d</test>"+
-		`<payment id="%s">`+
-		`  <prop name="sd" value="%s" />`+
-		`  <prop name="ed" value="%s" />`+
-		`  <prop name="card" value="%s" />`+
-		`</payment>`,
-		wait, test, paymentID,
-		fromDate.Format("02.01.2006"),
-		toDate.Format("02.01.2006"),
-		m.config.CardNumber)
-	signature := sha1hex(md5hex(data + m.config.MerchantPassword))
-	reqBuf := bytes.NewBufferString(fmt.Sprintf(
-		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
-			`<request version="1.0">`+
-			`  <merchant>`+
-			`    <id>%d</id>`+
-			`    <signature>%s</signature>`+
-			`  </merchant>`+
-			`  <data>%s</data>`+
-			`</request>`,
-		m.config.MerchantID, signature, data))
+	xmlData := xmlRequestData{
+		Oper: "cmt",
+		Wait: 10, // in seconds
+		Payment: xmlPayment{
+			ID: fmt.Sprintf("%x", rand.Uint64()),
+			Prop: []xmlProp{
+				{Name: "sd", Value: fromDate.Format("02.01.2006")},
+				{Name: "ed", Value: toDate.Format("02.01.2006")},
+				{Name: "card", Value: m.config.CardNumber},
+			},
+		},
+	}
+	encodedXMLData, err := xml.Marshal(xmlData)
+	if err != nil {
+		return nil, fmt.Errorf("marshal data: %w", err)
+	}
+	xmlReq := xmlRequest{
+		Version: "1.0",
+		Merchant: xmlMerchant{
+			ID: m.config.MerchantID,
+			Signature: sha1hex(md5hex(string(encodedXMLData) +
+				m.config.MerchantPassword)),
+		},
+		Data: xmlData,
+	}
+	encodedXMLReq, err := xml.Marshal(xmlReq)
+	if err != nil {
+		return nil, fmt.Errorf("marshal req: %w", err)
+	}
+	encodedXMLReq = append(
+		[]byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"),
+		encodedXMLReq...)
+	reqBuf := bytes.NewBuffer(encodedXMLReq)
 
 	// Perform HTTP request
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost,

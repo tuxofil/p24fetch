@@ -1,10 +1,38 @@
 package merchant
 
-import "github.com/tuxofil/p24fetch/schema"
+import (
+	"encoding/xml"
+
+	"github.com/tuxofil/p24fetch/schema"
+)
+
+type xmlRequest struct {
+	XMLName  xml.Name       `xml:"request"`
+	Version  string         `xml:"version,attr"`
+	Merchant xmlMerchant    `xml:"merchant"`
+	Data     xmlRequestData `xml:"data"`
+}
 
 type xmlMerchant struct {
-	ID        string `xml:"id"`
+	ID        int    `xml:"id"`
 	Signature string `xml:"signature"`
+}
+
+type xmlRequestData struct {
+	Oper    string     `xml:"oper"`
+	Wait    int        `xml:"wait"`
+	Test    int        `xml:"test"`
+	Payment xmlPayment `xml:"payment"`
+}
+
+type xmlPayment struct {
+	ID   string    `xml:"id,attr"`
+	Prop []xmlProp `xml:"prop"`
+}
+
+type xmlProp struct {
+	Name  string `xml:"name,attr"`
+	Value string `xml:"value,attr"`
 }
 
 type xmlResponse struct {

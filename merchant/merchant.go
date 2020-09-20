@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/tuxofil/p24fetch/config"
@@ -66,6 +67,7 @@ func (m *Merchant) FetchLog(ctx context.Context) ([]schema.XMLTransaction, error
 	if err != nil {
 		return nil, fmt.Errorf("marshal data: %w", err)
 	}
+	encodedXMLData = fixSelfClosingTags(encodedXMLData)
 	xmlReq := xmlRequest{
 		Version: "1.0",
 		Merchant: xmlMerchant{
@@ -79,6 +81,7 @@ func (m *Merchant) FetchLog(ctx context.Context) ([]schema.XMLTransaction, error
 	if err != nil {
 		return nil, fmt.Errorf("marshal req: %w", err)
 	}
+	encodedXMLReq = fixSelfClosingTags(encodedXMLReq)
 	encodedXMLReq = append(
 		[]byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"),
 		encodedXMLReq...)
@@ -129,4 +132,11 @@ func md5hex(s string) string {
 
 func sha1hex(s string) string {
 	return fmt.Sprintf("%x", sha1.Sum([]byte(s)))
+}
+
+var fixIssue21399 = regexp.MustCompile(`"></[a-z]+>`)
+
+// Workaround for https://github.com/golang/go/issues/21399
+func fixSelfClosingTags(data []byte) []byte {
+	return []byte(fixIssue21399.ReplaceAllString(string(data), "\"/>"))
 }

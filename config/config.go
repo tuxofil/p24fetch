@@ -14,6 +14,8 @@ type Config struct {
 	MerchantPassword string `split_words:"true" required:"true"`
 	// Bank card number
 	CardNumber string `split_words:"true" required:"true"`
+	// Deduplicator state directory
+	DedupDir string `split_words:"true" required:"true"`
 }
 
 // Read and parse configurations.
@@ -30,6 +32,9 @@ func New() (*Config, error) {
 	}
 	if cfg.CardNumber == "" {
 		return nil, errors.New("invalid card number")
+	}
+	if cfg.DedupDir == "" {
+		return nil, fmt.Errorf("invalid deduplicator dir: %#v", cfg.DedupDir)
 	}
 	return cfg, nil
 }

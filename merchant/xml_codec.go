@@ -43,4 +43,7 @@ type xmlResponseData struct {
 			Statement []schema.XMLTransaction `xml:"statement"`
 		} `xml:"statements"`
 	} `xml:"info"`
+	Error struct {
+		Message string `xml:"message,attr"`
+	} `xml:"error"`
 }

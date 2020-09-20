@@ -101,6 +101,9 @@ func (m *Merchant) FetchLog(ctx context.Context) ([]schema.XMLTransaction, error
 	if err := xml.Unmarshal(body, &parsedXML); err != nil {
 		return nil, fmt.Errorf("parse xml: %w", err)
 	}
+	if reason := parsedXML.Data.Error.Message; reason != "" {
+		return nil, fmt.Errorf("API error: %s", reason)
+	}
 
 	// Revert the list
 	var (

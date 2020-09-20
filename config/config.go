@@ -8,6 +8,9 @@ import (
 )
 
 type Config struct {
+	// Descriptive name of the merchant.
+	// Used for logging/messaging.
+	MerchantName string `split_words:"true" required:"true"`
 	// Privat24 Merchant ID
 	MerchantID int `split_words:"true" required:"true"`
 	// Privat34 Merchant Password
@@ -34,6 +37,9 @@ func New() (*Config, error) {
 
 // Validate checks values of the configuration.
 func (c *Config) Validate() error {
+	if c.MerchantName == "" {
+		return errors.New("no merchant name")
+	}
 	if c.MerchantID < 1 {
 		return fmt.Errorf("invalid merchant ID: %d", c.MerchantID)
 	}

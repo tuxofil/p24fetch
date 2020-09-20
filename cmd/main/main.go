@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/tuxofil/p24fetch/config"
 	"github.com/tuxofil/p24fetch/dedup"
@@ -74,7 +75,7 @@ func Main() error {
 	}
 
 	// Export transactions
-	if err := exporter.Export(sortedLog); err != nil {
+	if err := exporter.Export(sortedLog, os.Stdout); err != nil {
 		return fmt.Errorf("export: %w", err)
 	}
 

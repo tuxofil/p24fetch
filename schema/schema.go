@@ -8,6 +8,14 @@ import (
 	"time"
 )
 
+type Format string
+
+// Valid formats for transaction exporting
+const (
+	JSON Format = "JSON"
+	QIF  Format = "QIF"
+)
+
 type Currency string
 
 // Known currencies

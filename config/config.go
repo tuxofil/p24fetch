@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/kelseyhightower/envconfig"
+
+	"github.com/tuxofil/p24fetch/schema"
 )
 
 type Config struct {
@@ -21,6 +23,14 @@ type Config struct {
 	Days int `split_words:"true" required:"true"`
 	// Deduplicator state directory
 	DedupDir string `split_words:"true" required:"true"`
+	// Export format
+	ExportFormat schema.Format `split_words:"true" required:"true"`
+	// Mandatory for QIF export format.
+	// Source account name.
+	SrcAccountName string `split_words:"true"`
+	// Mandatory for QIF export format.
+	// Account name for comissions.
+	ComissionAccountName string `split_words:"true"`
 }
 
 // Read and parse configurations.
@@ -54,6 +64,18 @@ func (c *Config) Validate() error {
 	}
 	if c.Days < 1 {
 		return fmt.Errorf("invalid days number: %d", c.Days)
+	}
+	switch c.ExportFormat {
+	case schema.JSON:
+	case schema.QIF:
+		if c.SrcAccountName == "" {
+			return errors.New("no source account name")
+		}
+		if c.ComissionAccountName == "" {
+			return errors.New("no comission account name")
+		}
+	default:
+		return fmt.Errorf("invalid export format: %s", c.ExportFormat)
 	}
 	return nil
 }

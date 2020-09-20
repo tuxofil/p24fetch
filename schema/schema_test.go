@@ -73,3 +73,19 @@ func TestParseTime(t *testing.T) {
 			"test case #%d: %+v", n, test)
 	}
 }
+
+func TestComission(t *testing.T) {
+	testset := []struct {
+		Tran   Transaction
+		Expect float32
+	}{
+		{Transaction{}, 0},
+		{Transaction{SrcVal: -2.25, SrcCur: UAH, DstVal: 2.0, DstCur: UAH}, 0.25},
+		{Transaction{SrcVal: -2.00, SrcCur: UAH, DstVal: 2.0, DstCur: UAH}, 0.0},
+		{Transaction{SrcVal: -2.01, SrcCur: UAH, DstVal: 2.0, DstCur: USD}, 0.0},
+	}
+	for n, test := range testset {
+		assert.Equal(t, test.Expect, test.Tran.Comission(),
+			"test case #%d: %+v", n, test)
+	}
+}

@@ -91,6 +91,8 @@ func ParseTime(d, t string) (time.Time, error) {
 	return res.UTC(), err
 }
 
+// Convert transaction object received from the Privat24 API to
+// more convenient, Golang native format.
 func ParseTransaction(xmlTran XMLTransaction) Transaction {
 	date, err := ParseTime(xmlTran.TranDate, xmlTran.TranTime)
 	if err != nil {
@@ -123,4 +125,12 @@ func ParseTransaction(xmlTran XMLTransaction) Transaction {
 		DstCur: toCurrency,
 		Note:   html.UnescapeString(xmlTran.Description),
 	}
+}
+
+// Comission returns the value of comission charged.
+func (t *Transaction) Comission() float32 {
+	if t.SrcVal >= 0 || t.SrcCur != t.DstCur {
+		return 0
+	}
+	return -(t.SrcVal + t.DstVal)
 }

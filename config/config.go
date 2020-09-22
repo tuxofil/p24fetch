@@ -15,35 +15,35 @@ import (
 type Config struct {
 	// Descriptive name of the merchant.
 	// Used for logging/messaging.
-	MerchantName string `split_words:"true" required:"true"`
+	MerchantName string `split_words:"true" json:"merchant_name"`
 
 	// Privat24 Merchant ID
-	MerchantID int `split_words:"true" required:"true"`
+	MerchantID int `split_words:"true" json:"merchant_id"`
 	// Privat34 Merchant Password
-	MerchantPassword string `split_words:"true" required:"true"`
+	MerchantPassword string `split_words:"true" json:"merchant_password"`
 	// Bank card number
-	CardNumber string `split_words:"true" required:"true"`
+	CardNumber string `split_words:"true" json:"card_number"`
 	// Fetch transaction history for this number of days
-	Days int `split_words:"true" required:"true"`
+	Days int `split_words:"true" json:"days"`
 
 	// Deduplicator state directory
-	DedupDir string `split_words:"true" required:"true"`
+	DedupDir string `split_words:"true" json:"dedup_dir"`
 	// Path to a JSON file with sorting rules.
-	RulesPath string `split_words:"true" required:"true"`
+	RulesPath string `split_words:"true" json:"rules_path"`
 
 	// Export format
-	ExportFormat schema.Format `split_words:"true" required:"true"`
+	ExportFormat schema.Format `split_words:"true" json:"export_format"`
 	// Mandatory for QIF export format.
 	// Source account name.
-	SrcAccountName string `split_words:"true"`
+	SrcAccountName string `split_words:"true" json:"src_account_name"`
 	// Mandatory for QIF export format.
 	// Account name for comissions.
-	ComissionAccountName string `split_words:"true"`
+	ComissionAccountName string `split_words:"true" json:"comission_account_name"`
 
 	// Token used to authenticate to Slack API
-	SlackToken string `split_words:"true"`
+	SlackToken string `split_words:"true" json:"slack_token"`
 	// Slack channel ID to write messages to.
-	SlackChannel string `split_words:"true"`
+	SlackChannel string `split_words:"true" json:"slack_channel"`
 
 	// Logging interface. Optional.
 	Logger *log.Logger
@@ -59,6 +59,34 @@ func New() (*Config, error) {
 		return nil, fmt.Errorf("validate: %w", err)
 	}
 	return cfg, nil
+}
+
+// SetDefaultsFrom copies missing values from another Config instance
+func (c *Config) SetDefaultsFrom(d Config) {
+	if c.Days == 0 {
+		c.Days = d.Days
+	}
+	if c.DedupDir == "" {
+		c.DedupDir = d.DedupDir
+	}
+	if c.RulesPath == "" {
+		c.RulesPath = d.RulesPath
+	}
+	if c.ExportFormat == schema.Format("") {
+		c.ExportFormat = d.ExportFormat
+	}
+	if c.SrcAccountName == "" {
+		c.SrcAccountName = d.SrcAccountName
+	}
+	if c.ComissionAccountName == "" {
+		c.ComissionAccountName = d.ComissionAccountName
+	}
+	if c.SlackToken == "" {
+		c.SlackToken = d.SlackToken
+	}
+	if c.SlackChannel == "" {
+		c.SlackChannel = d.SlackChannel
+	}
 }
 
 // Validate checks values of the configuration.

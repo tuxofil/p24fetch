@@ -11,6 +11,9 @@ import (
 type Rules struct {
 	// Mapping: ShortID -> GnuCash Account ID
 	Accounts map[string]string `json:"accounts"`
+	// Matcher rules. Transactions matching one of these
+	// patterns will be silently ignored.
+	Ignore []string `json:"ignore"`
 	// Matcher rules. Every element is a mapping:
 	//  ShortID -> list of patterns
 	Rules []map[string][]string `json:"rules"`
@@ -40,6 +43,14 @@ func ReadRules(path string) (*Rules, error) {
 // Compile all regexp patterns.
 func (r *Rules) CompilePatterns() error {
 	r.regexps = make(map[string]*regexp.Regexp)
+	for _, pattern := range r.Ignore {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			return fmt.Errorf("ignore: invalid pattern %#v: %w",
+				pattern, err)
+		}
+		r.regexps[pattern] = re
+	}
 	for _, rule := range r.Rules {
 		for name, patterns := range rule {
 			for _, pattern := range patterns {
@@ -72,6 +83,17 @@ func (r *Rules) Validate() error {
 		}
 	}
 	return nil
+}
+
+// Ignore returns true when given string were matched to
+// one of 'ignore' rules.
+func (r *Rules) IsIgnored(s string) bool {
+	for _, pattern := range r.Ignore {
+		if r.regexps[pattern].MatchString(s) {
+			return true
+		}
+	}
+	return false
 }
 
 // Traverse matching rules for GnuCash Account ID.

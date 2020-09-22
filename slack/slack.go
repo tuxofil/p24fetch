@@ -2,6 +2,7 @@ package slack
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/slack-go/slack"
 
@@ -31,6 +32,7 @@ func (s *Slack) ReportUnsorted(trans []schema.Transaction) {
 		return
 	}
 	for _, tran := range trans {
+		time.Sleep(time.Second)
 		_, _, err := s.client.PostMessage(s.config.SlackChannel,
 			slack.MsgOptionText(fmt.Sprintf(
 				"Unsorted transaction from `%s`:\n```%s```",

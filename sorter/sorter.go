@@ -1,7 +1,6 @@
 package sorter
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/tuxofil/p24fetch/config"
@@ -28,6 +27,7 @@ func New(cfg *config.Config) (*Sorter, error) {
 
 // Sort transactions according to rules.
 func (s *Sorter) Sort(trans []schema.Transaction) (
+	ignore []schema.Transaction,
 	mapped []schema.Transaction,
 	unmapped []schema.Transaction,
 ) {
@@ -40,13 +40,21 @@ func (s *Sorter) Sort(trans []schema.Transaction) (
 		if tran.Raw != nil {
 			bad = append(bad, tran)
 			continue
+		} else if tran.Error != "" {
+			bad = append(bad, tran)
+			continue
 		} else if tran.SrcVal >= 0 {
-			tran.Error = errors.New("deposits are not implemented")
+			tran.Error = "deposits are not implemented"
 			bad = append(bad, tran)
 			continue
 		} else if tran.SrcCur != tran.DstCur {
-			tran.Error = errors.New("currencies differ")
+			tran.Error = "currencies differ"
 			bad = append(bad, tran)
+			continue
+		}
+
+		if s.rules.IsIgnored(tran.Dst) || s.rules.IsIgnored(tran.Note) {
+			ignore = append(ignore, tran)
 			continue
 		}
 
@@ -66,5 +74,5 @@ func (s *Sorter) Sort(trans []schema.Transaction) (
 		tran.Dst = dstAcc
 		good = append(good, tran)
 	}
-	return good, bad
+	return ignore, good, bad
 }

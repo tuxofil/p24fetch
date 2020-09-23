@@ -45,7 +45,7 @@ type Transaction struct {
 	// Transaction note
 	Note string
 	// Not nil on XML parse error
-	Error error `json:"Error,omitempty"`
+	Error string `json:"Error,omitempty"`
 	// XML Transaction. Set only when Error is not nil.
 	Raw *XMLTransaction `json:"Raw,omitempty"`
 }
@@ -107,21 +107,21 @@ func ParseTransaction(xmlTran XMLTransaction) Transaction {
 	date, err := ParseTime(xmlTran.TranDate, xmlTran.TranTime)
 	if err != nil {
 		return Transaction{
-			Error: fmt.Errorf("parse time: %w", err),
+			Error: fmt.Sprintf("parse time: %s", err),
 			Raw:   &xmlTran,
 		}
 	}
 	fromAmount, fromCurrency, err := ParseAmount(xmlTran.CardAmount)
 	if err != nil {
 		return Transaction{
-			Error: fmt.Errorf("parse src amount: %w", err),
+			Error: fmt.Sprintf("parse src amount: %s", err),
 			Raw:   &xmlTran,
 		}
 	}
 	toAmount, toCurrency, err := ParseAmount(xmlTran.Amount)
 	if err != nil {
 		return Transaction{
-			Error: fmt.Errorf("parse dst amount: %w", err),
+			Error: fmt.Sprintf("parse dst amount: %s", err),
 			Raw:   &xmlTran,
 		}
 	}

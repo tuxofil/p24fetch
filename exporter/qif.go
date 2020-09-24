@@ -4,7 +4,7 @@ package exporter
 
 import (
 	"fmt"
-	"io"
+	"os"
 	"strings"
 
 	"github.com/tuxofil/p24fetch/schema"
@@ -23,10 +23,22 @@ func ExportToQIF(
 	trans []schema.Transaction,
 	srcAccName string,
 	comissionsAccName string,
-	w io.Writer,
+	path string,
 ) error {
-	if _, err := w.Write([]byte(fmt.Sprintf(qifHeader, srcAccName))); err != nil {
-		return err
+	fd, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil {
+		return fmt.Errorf("open file: %w", err)
+	}
+	fileInfo, err := fd.Stat()
+	if err != nil {
+		_ = fd.Close()
+		return fmt.Errorf("fstat: %w", err)
+	}
+	if fileInfo.Size() == 0 {
+		if _, err := fd.Write([]byte(fmt.Sprintf(qifHeader, srcAccName))); err != nil {
+			_ = fd.Close()
+			return fmt.Errorf("write header: %w", err)
+		}
 	}
 	for _, tran := range trans {
 		var s string
@@ -38,9 +50,13 @@ func ExportToQIF(
 			s = fmt.Sprintf(qifSimple, tran.Date.Format(dateLayout),
 				tran.SrcVal, rmNLs(tran.Note), tran.Dst, -tran.SrcVal)
 		}
-		if _, err := w.Write([]byte(s)); err != nil {
+		if _, err := fd.Write([]byte(s)); err != nil {
+			_ = fd.Close()
 			return err
 		}
+	}
+	if err := fd.Close(); err != nil {
+		return fmt.Errorf("file close: %w", err)
 	}
 	return nil
 }

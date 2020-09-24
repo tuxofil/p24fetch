@@ -30,6 +30,8 @@ type Config struct {
 	DedupDir string `split_words:"true" json:"dedup_dir"`
 	// Path to a JSON file with sorting rules.
 	RulesPath string `split_words:"true" json:"rules_path"`
+	// Path to a directory to write exported files
+	ResultsDir string `split_words:"true" json:"results_dir"`
 
 	// Export format
 	ExportFormat schema.Format `split_words:"true" json:"export_format"`
@@ -72,6 +74,9 @@ func (c *Config) SetDefaultsFrom(d Config) {
 	if c.RulesPath == "" {
 		c.RulesPath = d.RulesPath
 	}
+	if c.ResultsDir == "" {
+		c.ResultsDir = d.ResultsDir
+	}
 	if c.ExportFormat == schema.Format("") {
 		c.ExportFormat = d.ExportFormat
 	}
@@ -110,6 +115,9 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("invalid path to rules file: %w", err)
 	} else {
 		_ = fd.Close()
+	}
+	if c.ResultsDir == "" {
+		return fmt.Errorf("invalid results dir: %#v", c.ResultsDir)
 	}
 	if c.Days < 1 {
 		return fmt.Errorf("invalid days number: %d", c.Days)

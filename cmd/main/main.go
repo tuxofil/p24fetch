@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
+	"time"
 
 	"github.com/tuxofil/p24fetch/config"
 	"github.com/tuxofil/p24fetch/dedup"
@@ -25,10 +27,21 @@ func main() {
 }
 
 func Main() error {
-	cfg, err := config.New()
+	configs, err := config.NewConfigs(os.Args[1])
 	if err != nil {
-		return fmt.Errorf("create config: %w", err)
+		return fmt.Errorf("read config: %w", err)
 	}
+	for _, config := range configs {
+		if err := processMerchant(config); err != nil {
+			return fmt.Errorf("%s: %w", config.MerchantName, err)
+		}
+		time.Sleep(10 * time.Second)
+	}
+	return nil
+}
+
+func processMerchant(cfg *config.Config) error {
+	log.Printf("processing: %s", cfg.MerchantName)
 	merchant, err := merchant.New(cfg)
 	if err != nil {
 		return fmt.Errorf("create merchant: %w", err)
@@ -45,16 +58,15 @@ func Main() error {
 	if err != nil {
 		return fmt.Errorf("create Slack interface: %w", err)
 	}
-	exporter, err := exporter.New(cfg)
-	if err != nil {
-		return fmt.Errorf("create exporter: %w", err)
-	}
 
 	ctx := context.TODO()
 	// Fetch transaction log
 	xmlTrans, err := merchant.FetchLog(ctx)
 	if err != nil {
 		return fmt.Errorf("fetch log: %w", err)
+	} else if len(xmlTrans) == 0 {
+		log.Printf("no transactions found")
+		return nil
 	}
 
 	// Deduplicate
@@ -74,15 +86,31 @@ func Main() error {
 	}
 
 	// Sort transactions
-	sortedTrans, unsortedTrans := sorter.Sort(trans)
+	ignoredTrans, sortedTrans, unsortedTrans := sorter.Sort(trans)
+	log.Printf("  sorted: %d; unsorted: %d; ignored: %d",
+		len(sortedTrans), len(unsortedTrans), len(ignoredTrans))
+
+	// Export sorted transactions
+	if err := exporter.New(cfg).Export(sortedTrans); err != nil {
+		return fmt.Errorf("export sorted: %w", err)
+	}
+
+	// Export ignored transaction as JSON
+	cfg.ExportFormat = schema.JSON
+	resultsDir := cfg.ResultsDir
+	cfg.ResultsDir = path.Join(resultsDir, "ignored")
+	if err := exporter.New(cfg).Export(ignoredTrans); err != nil {
+		return fmt.Errorf("export ignored: %w", err)
+	}
+
+	// Export unsorted transactions as JSON
+	cfg.ResultsDir = path.Join(resultsDir, "unsorted")
+	if err := exporter.New(cfg).Export(unsortedTrans); err != nil {
+		return fmt.Errorf("export unsorted: %w", err)
+	}
 
 	// Send Slack notifications for unsorted transactions
 	slack.ReportUnsorted(unsortedTrans)
-
-	// Export transactions
-	if err := exporter.Export(sortedTrans, os.Stdout); err != nil {
-		return fmt.Errorf("export: %w", err)
-	}
 
 	// Update deduplicator state
 	if err := dedup.Update(lastTran); err != nil {

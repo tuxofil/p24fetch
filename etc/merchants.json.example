@@ -1,0 +1,29 @@
+{
+  "defaults": {
+    "days": 30,
+    "dedup_dir": "/var/lib/p24fetch/dedup",
+    "rules_path": "/etc/p24fetch/rules.json",
+    "results_dir": "/var/lib/p24fetch/results",
+    "export_format": "QIF",
+    "comission_account_name": "Expenses:Comissions",
+    "slack_token": "xoxp-XXXXX-XXXXX-XXXXX-XXXXX",
+    "slack_channel": "9BBIKCRLZJK"
+  },
+
+  "merchants": [
+    {
+      "merchant_name": "My VISA Card #1",
+      "merchant_id": 123456,
+      "merchant_password": "**************************",
+      "card_number": "4149XXXXXXXXXXXX",
+      "src_account_name": "Assets:My VISA Card #1"
+    },
+    {
+      "merchant_name": "My VISA Card #2",
+      "merchant_id": 123457,
+      "merchant_password": "**************************",
+      "card_number": "4149XXXXXXXXXXXX",
+      "src_account_name": "Assets:My VISA Card #2"
+    }
+  ]
+}

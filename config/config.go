@@ -36,10 +36,10 @@ type Config struct {
 	// Export format
 	ExportFormat schema.Format `split_words:"true" json:"export_format"`
 	// Mandatory for QIF export format.
-	// Source account name.
+	// Source account name -- GnuCash Account ID.
 	SrcAccountName string `split_words:"true" json:"src_account_name"`
 	// Mandatory for QIF export format.
-	// Account name for comissions.
+	// Account name for comissions -- GnuCash Account ID.
 	ComissionAccountName string `split_words:"true" json:"comission_account_name"`
 
 	// Token used to authenticate to Slack API

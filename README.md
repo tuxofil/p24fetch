@@ -30,6 +30,25 @@ On success, `p24fetch` executable will be generated.
 make test
 ```
 
+## How it works
+
+Possible usage workflow is:
+
+1. Launch p24fetch weekly (for instance, with [cron](https://en.wikipedia.org/wiki/Cron));
+2. Run GnuCash, import generated QIF files, then remove the files;
+3. Add unsorted transactions to GnuCash manually,
+ update sorting rules in the `rules.json` config file.
+
+## Configuration
+
+### Main configuration file -- `merchants.json`
+
+An example
+
+### Account mapping rules -- `rules.json`
+
+An example
+
 ## Links
 
 * https://api.privatbank.ua/#p24/orders

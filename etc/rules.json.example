@@ -1,0 +1,63 @@
+{
+  "accounts": {
+    "comissions": "Expenses:Comissions",
+    "fuel": "Expenses:Fuel",
+    "alcohol": "Expenses:Alcohol",
+    "food": "Expenses:Food",
+    "restaurant": "Expenses:Restaurants, cafe",
+    "medicine": "Expenses:Medicine",
+    "toys": "Expenses:Toys",
+    "city_transport": "Expenses:City transport, taxi",
+    "clothes": "Expenses:Clothes",
+    "books": "Expenses:Leasure:Books",
+    "insurance": "Expenses:Insurance"
+  },
+  "ignore": [
+    "Cash withdrawal from ATM"
+  ],
+  "rules": [
+    {"food": [
+      "supermarket",
+      "bakery"
+    ]},
+    {"alcohol": [
+      "Wine Shop"
+    ]},
+    {"restaurant": [
+      "McDonalds",
+      "KFC",
+      "restaurant",
+      "cafe"
+    ]},
+    {"medicine": [
+      "pharmacy",
+      "clinic"
+    ]},
+    {"fuel": [
+      "gas Station"
+    ]},
+    {"city_transport": [
+      "subway",
+      "Uber"
+    ]},
+    {"toys": [
+      "Kinder Paradise",
+      "toys",
+      "STEAMGAMES.COM"
+    ]},
+    {"clothes": [
+      "clothes",
+      "shoes",
+      "Boutique"
+    ]},
+    {"books": [
+      "Book Store"
+    ]},
+    {"comissions": [
+      "comission"
+    ]},
+    {"insurance": [
+      "Insurance"
+    ]}
+  ]
+}

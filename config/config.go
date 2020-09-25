@@ -7,60 +7,46 @@ import (
 	"os"
 	"strings"
 
-	"github.com/kelseyhightower/envconfig"
-
 	"github.com/tuxofil/p24fetch/schema"
 )
 
 type Config struct {
 	// Descriptive name of the merchant.
 	// Used for logging/messaging.
-	MerchantName string `split_words:"true" json:"merchant_name"`
+	MerchantName string `json:"merchant_name"`
 
 	// Privat24 Merchant ID
-	MerchantID int `split_words:"true" json:"merchant_id"`
+	MerchantID int `json:"merchant_id"`
 	// Privat34 Merchant Password
-	MerchantPassword string `split_words:"true" json:"merchant_password"`
+	MerchantPassword string `json:"merchant_password"`
 	// Bank card number
-	CardNumber string `split_words:"true" json:"card_number"`
+	CardNumber string `json:"card_number"`
 	// Fetch transaction history for this number of days
-	Days int `split_words:"true" json:"days"`
+	Days int `json:"days"`
 
 	// Deduplicator state directory
-	DedupDir string `split_words:"true" json:"dedup_dir"`
+	DedupDir string `json:"dedup_dir"`
 	// Path to a JSON file with sorting rules.
-	RulesPath string `split_words:"true" json:"rules_path"`
+	RulesPath string `json:"rules_path"`
 	// Path to a directory to write exported files
-	ResultsDir string `split_words:"true" json:"results_dir"`
+	ResultsDir string `json:"results_dir"`
 
 	// Export format
-	ExportFormat schema.Format `split_words:"true" json:"export_format"`
+	ExportFormat schema.Format `json:"export_format"`
 	// Mandatory for QIF export format.
 	// Source account name -- GnuCash Account ID.
-	SrcAccountName string `split_words:"true" json:"src_account_name"`
+	SrcAccountName string `json:"src_account_name"`
 	// Mandatory for QIF export format.
 	// Account name for comissions -- GnuCash Account ID.
-	ComissionAccountName string `split_words:"true" json:"comission_account_name"`
+	ComissionAccountName string `json:"comission_account_name"`
 
 	// Token used to authenticate to Slack API
-	SlackToken string `split_words:"true" json:"slack_token"`
+	SlackToken string `json:"slack_token"`
 	// Slack channel ID to write messages to.
-	SlackChannel string `split_words:"true" json:"slack_channel"`
+	SlackChannel string `json:"slack_channel"`
 
 	// Logging interface. Optional.
 	Logger *log.Logger
-}
-
-// Read and parse configurations.
-func New() (*Config, error) {
-	cfg := &Config{Logger: log.New(os.Stderr, "", 0)}
-	if err := envconfig.Process("", cfg); err != nil {
-		return nil, fmt.Errorf("parse env vars: %w", err)
-	}
-	if err := cfg.Validate(); err != nil {
-		return nil, fmt.Errorf("validate: %w", err)
-	}
-	return cfg, nil
 }
 
 // SetDefaultsFrom copies missing values from another Config instance

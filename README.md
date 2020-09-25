@@ -39,6 +39,12 @@ Possible usage workflow is:
 3. Add unsorted transactions to GnuCash manually,
  update sorting rules in the `rules.json` config file.
 
+On every successful merchant processing the date and time of the last
+fetched transaction will be stored under `run/dedup` directory (see
+`dedup_dir` setting in `merchants.json` configuration file), so
+the next time `p24fetch` will pull transactions from the Privat24 API
+only new transactions will be processed.
+
 ## Configuration
 
 ### Main configuration file -- `merchants.json`

@@ -25,6 +25,9 @@ func New(cfg *config.Config) *Exporter {
 
 // Export transaction log to external storage.
 func (e *Exporter) Export(trans []schema.Transaction) error {
+	if len(trans) == 0 {
+		return nil
+	}
 	if err := os.MkdirAll(e.config.ResultsDir, 0700); err != nil {
 		return fmt.Errorf("create results dir: %w", err)
 	}

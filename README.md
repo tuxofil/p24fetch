@@ -24,6 +24,12 @@ make
 
 On success, `p24fetch` executable will be generated.
 
+## Run the tool
+
+```
+./p24fetch etc/merchants.json
+```
+
 ## Run unit tests
 
 ```

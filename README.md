@@ -51,6 +51,11 @@ fetched transaction will be stored under `run/dedup` directory (see
 the next time `p24fetch` will pull transactions from the Privat24 API
 only new transactions will be processed.
 
+## Limitations
+
+* doesn't process deposits;
+* doesn't process transactions between accounts with different currencies.
+
 ## Configuration
 
 ### Main configuration file -- `merchants.json`
